@@ -23,8 +23,8 @@ export class Content {
     public static whitePixelTexture: Texture; // New: 1x1 white pixel texture for solid colors
 
     public static async initialize(gl: WebGL2RenderingContext) {
-        this.spriteSheet = await Texture.loadTexture(gl, "assets/Spritesheet/sheet.png");
-        this.heartTexture = await Texture.loadTexture(gl, "assets/heart.png"); // Load heart texture
+        this.spriteSheet = await Texture.loadTexture(gl, "./assets/Spritesheet/sheet.png");
+        this.heartTexture = await Texture.loadTexture(gl, "./assets/heart.png"); // Load heart texture
 
         // Create a 1x1 white pixel texture
         const whiteTexture = gl.createTexture();
@@ -34,23 +34,23 @@ export class Content {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         this.whitePixelTexture = new Texture(whiteTexture!, 1, 1);
 
-        this.testUvTexture = await Texture.loadTexture(gl, "assets/test_uv.jpg");
-        this.backgroundTexture = await Texture.loadTexture(gl, "assets/Backgrounds/purple.png");
-        this.explosionTexture = await Texture.loadTexture(gl, "assets/explosion.png");
+        this.testUvTexture = await Texture.loadTexture(gl, "./assets/test_uv.jpg");
+        this.backgroundTexture = await Texture.loadTexture(gl, "./assets/Backgrounds/purple.png");
+        this.explosionTexture = await Texture.loadTexture(gl, "./assets/explosion.png");
 
-        this.laserSound = await this.loadSound("assets/Bonus/sfx_laser1.ogg");
+        this.laserSound = await this.loadSound("./assets/Bonus/sfx_laser1.ogg");
 
         this.spriteFont = await this.loadSnowBSpriteFont(gl, 
-            "assets/SpriteFont.xml",
-            "assets/SpriteFont.png");
+            "./assets/SpriteFont.xml",
+            "./assets/SpriteFont.png");
 
-        this.iceTexture = await Texture.loadTexture(gl, "assets/ice01.jpg");
+        this.iceTexture = await Texture.loadTexture(gl, "./assets/ice01.jpg");
 
         await this.loadSpriteSheet();
     }
 
     private static async loadSpriteSheet() {
-        const sheetXmlReq = await fetch("assets/Spritesheet/sheet.xml");
+        const sheetXmlReq = await fetch("././assets/Spritesheet/sheet.xml");
         const sheetXmlText = await sheetXmlReq.text();
 
         const parser = new DOMParser();
