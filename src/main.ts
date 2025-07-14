@@ -9,8 +9,10 @@ import { vec2 } from "gl-matrix";
 import { Content } from "./content";
 import { Button } from "./ui/button"; // Import the new Button class
 import { Color } from "./color"; // Import Color for button styling
+import { Rect } from "./rect";
 
 enum GameState {
+    Start,
     Playing,
     GameOver
 }
@@ -18,20 +20,15 @@ enum GameState {
 const engine = new Engine();
 engine.initialize().then(() =>
 {
-    let gameState = GameState.Playing;
+    let gameState = GameState.Start;
 
     // Initialize game entities (use `let` for reinitialization)
-    let player = new Player(engine.inputManager, engine.clientBounds[0], engine.clientBounds[1]);
-    let background = new Background(engine.clientBounds[0], engine.clientBounds[1]);
-    let explosionManager = new ExplosionManager();
-    let bulletManager = new BulletManager(player);
-    let highScore = new HighScore();
-    let enemyManager = new EnemyManager(engine.clientBounds[0],
-        engine.clientBounds[1],
-        player,
-        explosionManager,
-        bulletManager,
-        highScore);
+    let player: Player;
+    let background: Background;
+    let explosionManager: ExplosionManager;
+    let bulletManager: BulletManager;
+    let highScore: HighScore;
+    let enemyManager: EnemyManager;
 
     const bloomEffect = engine.effectsFactory.createBloomEffect();
 
@@ -47,7 +44,6 @@ engine.initialize().then(() =>
 
     // Function to reset the game state
     const resetGame = () => {
-        gameState = GameState.Playing;
         player = new Player(engine.inputManager, engine.clientBounds[0], engine.clientBounds[1]); // Reinitialize player
         background = new Background(engine.clientBounds[0], engine.clientBounds[1]); // Reinitialize background
         explosionManager = new ExplosionManager(); // Reinitialize explosion manager
@@ -59,12 +55,17 @@ engine.initialize().then(() =>
             explosionManager,
             bulletManager,
             highScore); // Reinitialize enemy manager with new player and score
+        gameState = GameState.Playing;
     };
 
     engine.onUpdate = (dt) => {
-        background.update(dt); // Always update background for a moving effect
-
-        if (gameState === GameState.Playing) {
+        if (gameState === GameState.Start) {
+            if (engine.inputManager.isMouseClicked) {
+                resetGame();
+                engine.inputManager.resetMouseClicked();
+            }
+        } else if (gameState === GameState.Playing) {
+            background.update(dt);
             player.update(dt);
             enemyManager.update(dt);
             explosionManager.update(dt);
@@ -74,6 +75,7 @@ engine.initialize().then(() =>
                 gameState = GameState.GameOver;
             }
         } else if (gameState === GameState.GameOver) {
+            background.update(dt); // Keep background moving in game over screen
             // Handle retry button click
             if (engine.inputManager.isMouseClicked) {
                 const mouseX = engine.inputManager.mouseClickPosition[0];
@@ -98,27 +100,58 @@ engine.initialize().then(() =>
 
         engine.spriteRenderer.begin();
 
-        background.draw(engine.spriteRenderer);
-        player.draw(engine.spriteRenderer);
-        enemyManager.draw(engine.spriteRenderer);
-        bulletManager.draw(engine.spriteRenderer);
-        explosionManager.draw(engine.spriteRenderer);
-        highScore.draw(engine.spriteRenderer, player);
+        if (gameState === GameState.Start) {
+            const startText = "READY FOR LAUNCH";
+            const subText = "CLICK TO BEGIN";
+        
+            const startScale = 0.65;
+            const subScale = 0.55;
+        
+            const startTextSize = Content.spriteFont.measureText(startText, startScale);
+            const subTextSize = Content.spriteFont.measureText(subText, subScale);
+        
+            const startPos = vec2.fromValues(
+                (engine.clientBounds[0] / 2) - (startTextSize[0] / 2),
+                (engine.clientBounds[1] / 2) - (startTextSize[1] / 2) - 40
+            );
+        
+            const subPos = vec2.fromValues(
+                (engine.clientBounds[0] / 2) - (subTextSize[0] / 2),
+                (engine.clientBounds[1] / 2) - (subTextSize[1] / 2) + 40
+            );
+        
+            const alpha = 0.6 + 0.4 * Math.sin(performance.now() / 400);
+            const neonBlue = new Color(0.4, 0.8, 1.0, alpha);
+        
+            engine.spriteRenderer.drawString(Content.spriteFont, startText, startPos, neonBlue, startScale);
+            engine.spriteRenderer.drawString(Content.spriteFont, subText, subPos, neonBlue, subScale);
+        } else if (gameState === GameState.Playing) {
+            background.draw(engine.spriteRenderer);
+            player.draw(engine.spriteRenderer);
+            enemyManager.draw(engine.spriteRenderer);
+            bulletManager.draw(engine.spriteRenderer);
+            explosionManager.draw(engine.spriteRenderer);
+            highScore.draw(engine.spriteRenderer, player);
+        } else if (gameState === GameState.GameOver) {
+            // Draw semi-transparent overlay
+            // Note: This requires a texture or a way to draw solid colors. Assuming whitePixelTexture exists in Content.
+            const overlayColor = new Color(0, 0, 0, 0.6);
+            engine.spriteRenderer.drawSprite(Content.whitePixelTexture, new Rect(0, 0, engine.clientBounds[0], engine.clientBounds[1]), overlayColor);
 
-        if (gameState === GameState.GameOver) {
+            background.draw(engine.spriteRenderer); // Draw background under the text
+            highScore.draw(engine.spriteRenderer, player); // Draw final score and health
+
             const gameOverText = "GAME OVER";
             const scoreText = `Final Score: ${highScore.currentScore}`;
 
-            // Adjust scales for better fit
-            const gameOverScale = 1.0; // Reduced from 1.5
-            const scoreScale = 0.75;   // Reduced from 1.0
+            const gameOverScale = 1.0;
+            const scoreScale = 0.75;
 
             const gameOverTextSize = Content.spriteFont.measureText(gameOverText, gameOverScale);
             const scoreTextSize = Content.spriteFont.measureText(scoreText, scoreScale);
 
-            // Adjust vertical positions for better spacing
-            const gameOverYOffset = -50; // Move up from center
-            const scoreYOffset = 20;    // Move down from center
+            const gameOverYOffset = -50;
+            const scoreYOffset = 20;
 
             const gameOverPos = vec2.fromValues(
                 (engine.clientBounds[0] / 2) - (gameOverTextSize[0] / 2),
@@ -133,9 +166,8 @@ engine.initialize().then(() =>
             engine.spriteRenderer.drawString(Content.spriteFont, gameOverText, gameOverPos, undefined, gameOverScale);
             engine.spriteRenderer.drawString(Content.spriteFont, scoreText, scorePos, undefined, scoreScale);
 
-            // Draw the retry button
             const buttonX = (engine.clientBounds[0] / 2) - (retryButtonWidth / 2);
-            const buttonY = scorePos[1] + scoreTextSize[1] + 30; // Position below score text
+            const buttonY = scorePos[1] + scoreTextSize[1] + 30;
 
             retryButton = new Button(
                 retryButtonText,
