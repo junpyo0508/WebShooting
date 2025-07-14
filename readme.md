@@ -10,7 +10,8 @@ A classic 2D space shooter game built with WebGL, offering a retro arcade experi
 
 ## Preview
 
-![Game Screenshot](![alt text](image.png))
+![Game Screenshot]<img width="600" height="900" alt="image" src="https://github.com/user-attachments/assets/bfe0fbc6-fbad-4141-a96b-6f2647a8e33f" />
+
 *A glimpse of the gameplay — dodge meteors, blast enemies, and survive the waves!*
 
 ## Features
