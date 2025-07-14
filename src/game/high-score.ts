@@ -4,9 +4,6 @@ import { Content } from "../content";
 import { Player } from "./player";
 import { Rect } from "../rect";
 import { Color } from "../color";
-import { Player } from "./player";
-import { Rect } from "../rect";
-import { Color } from "../color";
 
 export class HighScore
 {

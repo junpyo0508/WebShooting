@@ -7,8 +7,9 @@ import { vec2 } from "gl-matrix";
 import { EffectsFactory } from "./effects-factory";
 
 export class Engine {
-    private canvas!: HTMLCanvasElement;
-    private gl!: WebGL2RenderingContext;
+    public canvas!: HTMLCanvasElement;
+
+    private _gl!: WebGL2RenderingContext;
     private lastTime = 0;
 
     public spriteRenderer!: SpriteRenderer;
@@ -27,20 +28,20 @@ export class Engine {
     public async initialize() {
         this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
         this.inputManager.initialize();
-        this.gl = this.canvas.getContext("webgl2", {
+        this._gl = this.canvas.getContext("webgl2", {
             alpha: false,
         })!;
-        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
+        this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, true);
 
         this.clientBounds[0] = this.canvas.width;
         this.clientBounds[1] = this.canvas.height;
 
-        await Content.initialize(this.gl);
+        await Content.initialize(this._gl);
 
-        this.spriteRenderer = new SpriteRenderer(this.gl, this.canvas.width, this.canvas.height);
+        this.spriteRenderer = new SpriteRenderer(this._gl, this.canvas.width, this.canvas.height);
         await this.spriteRenderer.initialize();
 
-        this.effectsFactory = new EffectsFactory(this.gl, this.canvas.width, this.canvas.height);
+        this.effectsFactory = new EffectsFactory(this._gl, this.canvas.width, this.canvas.height);
     }
 
     rotation = 0;
@@ -53,9 +54,9 @@ export class Engine {
 
         this.onUpdate(dt);
 
-        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        this.gl.clearColor(0,0,0, 1);
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        this._gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        this._gl.clearColor(0,0,0, 1);
+        this._gl.clear(this._gl.COLOR_BUFFER_BIT);
 
         this.onDraw();
 
