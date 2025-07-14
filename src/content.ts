@@ -50,7 +50,7 @@ export class Content {
     }
 
     private static async loadSpriteSheet() {
-        const sheetXmlReq = await fetch("./../assets/Spritesheet/sheet.xml");
+        const sheetXmlReq = await fetch("../assets/Spritesheet/sheet.xml");
         const sheetXmlText = await sheetXmlReq.text();
 
         const parser = new DOMParser();
