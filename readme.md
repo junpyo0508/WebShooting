@@ -84,13 +84,3 @@ Pull requests are welcome! If you have feature suggestions, bug fixes, or perfor
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a pull request
 
-## Credits
-
-Art used and credits to:
-
-*   **Space Shooter (Redux, plus fonts and sounds)** by Kenney Vleugels (www.kenney.nl) - Licensed under CC0 (http://creativecommons.org/publicdomain/zero/1.0/)
-*   [https://opengameart.org/content/seamless-ice](https://opengameart.org/content/seamless-ice)
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
